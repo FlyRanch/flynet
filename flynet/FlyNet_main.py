@@ -233,7 +233,7 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
     def select_calib_callback(self):
         self.select_calib_window.exec_()
         self.calib_path = self.select_calib_window.folder_path
-        if self.calibpath is None:
+        if self.calib_path is None:
             return
         print(self.calib_path)
         for root, dirs, files in os.walk(self.calib_path):
