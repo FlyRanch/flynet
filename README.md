@@ -1,5 +1,9 @@
-## flynet 
+![header](images/flynet_header.png)
 
-Johan Miles's flynet. 
+Flynet software from Miles and Dickinson 2023 flynet. 
+
+### Installation
+
+TO DO
 
 
