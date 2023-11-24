@@ -1,6 +1,6 @@
 ![header](images/flynet_header.png)
 
-Flynet software used in Miles and Dickinson 2023 flynet. 
+Flynet software used in Melis, Siwanowicz, and Dickinson 2023
 
 ### Installation
 
