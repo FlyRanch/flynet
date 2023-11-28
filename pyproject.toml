@@ -11,6 +11,8 @@ license = {text="MIT"}
 requires-python = ">= 3.10,<3.13"
 
 dependencies = [
+    "tensorflow ~= 2.12.0",
+    "keras ~= 2.12.0",
     "numpy ~= 1.23",
     "scipy ~= 1.11",
     "matplotlib ~= 3.7.1",
@@ -32,8 +34,8 @@ flynet-app = "flynet:appMain"
 [tool.setuptools]
 include-package-data = true
 
-#[tool.setuptools.packages.find]
-#where = ["src"]
+[tool.setuptools.packages.find]
+exclude = ["images"]
 
 
 

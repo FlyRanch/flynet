@@ -22,11 +22,11 @@ import random
 
 import tensorflow as tf
 
-from keras.backend.tensorflow_backend import set_session
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-sess = tf.Session(config=config)
-set_session(sess)  # set this TensorFlow session as the default session for Keras
+#from keras.backend.tensorflow_backend import set_session
+#config = tf.ConfigProto()
+#config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
+#sess = tf.Session(config=config)
+#set_session(sess)  # set this TensorFlow session as the default session for Keras
 
 from keras.layers import Dense, Input, Concatenate
 from keras.layers import Conv2D, Flatten, Lambda, MaxPooling2D
@@ -455,11 +455,11 @@ class FullNetwork():
                 self.mdl.PlotKeyPoints(output_dir,img_real,pred_3D_pts[j,:],i*self.batch_size+j)
         self.data_generator.close_data_set()
 
-class NetworkViewer(pg.GraphicsWindow):
+class NetworkViewer(pg.GraphicsLayoutWidget):
 
     def __init__(self, parent=None):
 
-        pg.GraphicsWindow.__init__(self)
+        pg.GraphicsLayoutWidget.__init__(self)
         self.setParent(parent)
 
         self.w_sub = self.addLayout(row=0,col=0)
