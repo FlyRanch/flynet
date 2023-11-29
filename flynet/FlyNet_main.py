@@ -14,6 +14,7 @@ import math
 #import pickle
 import os
 import os.path
+import pathlib
 import math
 import copy
 import time
@@ -119,11 +120,18 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
     #-----------------------------------------------------------------------
 
     def load_data_gui(self):
-        self.base_dir = '/home/flynet/Documents/Flyami_movies'
-        self.select_session_window = SelectFolderWindow(self.base_dir)
+
+        print('load gui data')
+
+        #self.base_dir = '/home/flynet/Documents/Flyami_movies'
+        self.home_dir = pathlib.Path().home()
+        self.base_dir = pathlib.Path(self.home_dir, 'flynet/movies')
+        self.select_session_window = SelectFolderWindow(str(self.base_dir))
         self.select_session_window.setWindowTitle("Select session folder")
-        calib_fldr = '/home/flynet/Documents/FlyNet4/data'
-        self.select_calib_window = SelectFolderWindow(calib_fldr)
+        #calib_fldr = '/home/flynet/Documents/FlyNet4/data'
+        #self.select_calib_window = SelectFolderWindow(calib_fldr)
+        self.calib_dir = pathlib.Path(self.home_dir, 'flynet/data')
+        self.select_calib_window = SelectFolderWindow(str(self.calib_dir))
         self.select_calib_window.setWindowTitle("Select calibration file")
         self.select_movie_window = SelectFolderWindow(self.base_dir)
         self.select_movie_window.setWindowTitle("Select movie folder")
@@ -133,8 +141,10 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
         self.select_model_window = SelectFolderWindow(self.mdl_dir)
         self.select_model_window.setWindowTitle("Select model folder")
         self.network_dir = '/home/flynet/Documents/FlyNet4/networks'
-        self.network_options = ['...','FlyNetwork','FlyNet_split']
         self.weights_folder = self.network_dir
+        self.trig_modes = ['...','start','center','end']
+        self.network_options = ['...','FlyNet','FlyNet2', 'FlyNet3']
+
         # Parameters
         self.session_path = None
         self.session_folder = None
@@ -156,8 +166,6 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
         self.end_frame = None
         self.N_frames_list = []
         # Additional parameters
-        self.trig_modes = ['...','start','center','end']
-        self.network_options = ['...','FlyNet','FlyNet2', 'FlyNet3']
         # Start GUI
         self.select_seq_btn.clicked.connect(self.select_session_callback)
         self.seq_folder_disp.setText('...')
