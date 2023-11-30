@@ -37,6 +37,9 @@ include-package-data = true
 [tool.setuptools.packages.find]
 exclude = ["images"]
 
+[tool.setuptools.package-data]
+"flynet.drosophila" = ["*.stl"]
+
 
 
 

@@ -28,10 +28,9 @@ import re
 from scipy.io import loadmat
 
 from .PostProcessing import PostProcessing
-
 from .session_select import Ui_Session_Dialog
-
 from .fly_net_ui import Ui_MainWindow
+from .drosophila import model as drosophila 
 
 class CheckableDirModel(QtWidgets.QDirModel):
     def __init__(self, parent=None):
@@ -121,29 +120,30 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
 
     def load_data_gui(self):
 
-        print('load gui data')
-
         #self.base_dir = '/home/flynet/Documents/Flyami_movies'
         self.home_dir = pathlib.Path().home()
-        self.base_dir = pathlib.Path(self.home_dir, 'flynet/movies')
+        self.base_dir = self.home_dir / 'flynet/movies'
         self.select_session_window = SelectFolderWindow(str(self.base_dir))
         self.select_session_window.setWindowTitle("Select session folder")
         #calib_fldr = '/home/flynet/Documents/FlyNet4/data'
         #self.select_calib_window = SelectFolderWindow(calib_fldr)
-        self.calib_dir = pathlib.Path(self.home_dir, 'flynet/data')
+        self.calib_dir = self.home_dir / 'flynet/calibrations'
         self.select_calib_window = SelectFolderWindow(str(self.calib_dir))
         self.select_calib_window.setWindowTitle("Select calibration file")
-        self.select_movie_window = SelectFolderWindow(self.base_dir)
+        self.select_movie_window = SelectFolderWindow(str(self.base_dir))
         self.select_movie_window.setWindowTitle("Select movie folder")
-        self.select_save_window = SelectFolderWindow(self.base_dir)
+        self.select_save_window = SelectFolderWindow(str(self.base_dir))
         self.select_save_window.setWindowTitle("Select save folder")
-        self.mdl_dir = '/home/flynet/Documents/FlyNet4/models'
-        self.select_model_window = SelectFolderWindow(self.mdl_dir)
+
+        #self.mdl_dir = '/home/flynet/Documents/FlyNet4/models'
+        self.mdl_dir = self.home_dir / 'flynet/models'
+        self.select_model_window = SelectFolderWindow(str(self.mdl_dir))
         self.select_model_window.setWindowTitle("Select model folder")
-        self.network_dir = '/home/flynet/Documents/FlyNet4/networks'
+        #self.network_dir = '/home/flynet/Documents/FlyNet4/networks'
+        self.network_dir = self.home_dir / 'flynet/networks'
         self.weights_folder = self.network_dir
         self.trig_modes = ['...','start','center','end']
-        self.network_options = ['...','FlyNet','FlyNet2', 'FlyNet3']
+        self.network_options = ['...','FlyNet']
 
         # Parameters
         self.session_path = None
@@ -178,6 +178,8 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
         self.set_trigger_mode_box(self.trigger_mode_combo)
         self.select_save_fldr_btn.clicked.connect(self.select_save_fldr_callback)
         self.img_viewer_1.set_ses_calc_progress(self.crop_seq_calc_progress)
+
+        self.load_model_callback(select_window=False)
 
     def select_session_callback(self):
         self.select_session_window.exec_()
@@ -245,6 +247,7 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
             return
         print(self.calib_path)
         for root, dirs, files in os.walk(self.calib_path):
+            print(root, dirs, files)
             if len(files)>0:
                 for file in files:
                     file_name = os.path.splitext(file)[0]
@@ -611,16 +614,19 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
         self.load_tracked_btn.clicked.connect(self.load_data_tracked_callback)
         self.load_tracked_btn.setEnabled(False)
 
-    def load_model_callback(self):
-        self.select_model_window.exec_()
-        model_file_loc = str(self.select_model_window.folder_path)
-        model_file_name = str(self.select_model_window.folder_name)
-        self.model_name = model_file_name
-        self.model_disp.setText(self.model_name)
-        sys.path.append(model_file_loc)
-        from model import Model
-        print("loading model")
-        self.mdl = Model()
+    def load_model_callback(self, select_window=True):
+        if select_window:
+            self.select_model_window.exec_()
+            model_file_loc = str(self.select_model_window.folder_path)
+            model_file_name = str(self.select_model_window.folder_name)
+            self.model_name = model_file_name
+            self.model_disp.setText(self.model_name)
+            sys.path.append(model_file_loc)
+            import model
+            self.mdl = model.Model()
+        else:
+            self.mdl = drosophila.Model()
+
         #print('window size')
         #self.window_size = self.img_viewer_1.window_size
         #print(self.window_size)
