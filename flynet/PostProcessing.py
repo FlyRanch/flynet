@@ -75,7 +75,8 @@ class PostProcessing():
         self.N_components = 5
         self.mdl_components = ['...','head','thorax','abdomen','wing left','wing right']
         # Kalman filter:
-        self.EKF_filter = Kalman_lib.Kalman()
+        #self.EKF_filter = Kalman_lib.Kalman()
+        self.EKF_filter = flynet_kalman.Kalman()
 
     def set_seq_file(self,seq_file_in,seq_name_in):
         self.seq_name = seq_name_in
@@ -497,28 +498,69 @@ class PostProcessing():
                 curves_pen.append((0,0,255))
                 curves_legends.append('w dot z')
         elif self.filt_trace_view:
-            if self.comp_ind==0:
-                q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][0:4,:]
-            elif self.comp_ind==1:
-                q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][7:11,:]
-            elif self.comp_ind==2:
-                q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][14:18,:]
-            elif self.comp_ind==3:
-                q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][21:25,:]
-            elif self.comp_ind==4:
-                q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][29:33,:]
-            curves.append([frame_trace,q_filt[0,:]])
-            curves_pen.append((255,0,0))
-            curves_legends.append('q0 filt')
-            curves.append([frame_trace,q_filt[1,:]])
-            curves_pen.append((0,255,0))
-            curves_legends.append('q1 filt')
-            curves.append([frame_trace,q_filt[2,:]])
-            curves_pen.append((0,0,255))
-            curves_legends.append('q2 filt')
-            curves.append([frame_trace,q_filt[3,:]])
-            curves_pen.append((255,0,255))
-            curves_legends.append('q3 filt')
+            if self.n_deriv_view==0:
+                if self.comp_ind==0:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][0:4,:]
+                elif self.comp_ind==1:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][0:4,:]
+                elif self.comp_ind==2:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][0:4,:]
+                elif self.comp_ind==3:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][0:4,:]
+                elif self.comp_ind==4:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][0:4,:]
+                curves.append([frame_trace,q_filt[0,:]])
+                curves_pen.append((255,0,0))
+                curves_legends.append('q0 filt')
+                curves.append([frame_trace,q_filt[1,:]])
+                curves_pen.append((0,255,0))
+                curves_legends.append('q1 filt')
+                curves.append([frame_trace,q_filt[2,:]])
+                curves_pen.append((0,0,255))
+                curves_legends.append('q2 filt')
+                curves.append([frame_trace,q_filt[3,:]])
+                curves_pen.append((255,0,255))
+                curves_legends.append('q3 filt')
+            elif self.n_deriv_view==1:
+                if self.comp_ind==0:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][7:10,:]
+                elif self.comp_ind==1:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][7:10,:]
+                elif self.comp_ind==2:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][7:10,:]
+                elif self.comp_ind==3:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][8:11,:]
+                elif self.comp_ind==4:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][8:11,:]
+                curves.append([frame_trace,q_filt[0,:]])
+                curves_pen.append((255,0,0))
+                curves_legends.append('wx')
+                curves.append([frame_trace,q_filt[1,:]])
+                curves_pen.append((0,255,0))
+                curves_legends.append('wy')
+                curves.append([frame_trace,q_filt[2,:]])
+                curves_pen.append((0,0,255))
+                curves_legends.append('wz')
+            elif self.n_deriv_view==2:
+                if self.comp_ind==0:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][13:16,:]
+                elif self.comp_ind==1:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][13:16,:]
+                elif self.comp_ind==2:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][13:16,:]
+                elif self.comp_ind==3:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][15:18,:]
+                elif self.comp_ind==4:
+                    q_filt = self.filtered_data[self.mov_nr][self.seq_nr][self.comp_ind][15:18,:]
+                curves.append([frame_trace,q_filt[0,:]])
+                curves_pen.append((255,0,0))
+                curves_legends.append('w dot x')
+                curves.append([frame_trace,q_filt[1,:]])
+                curves_pen.append((0,255,0))
+                curves_legends.append('w dot y')
+                curves.append([frame_trace,q_filt[2,:]])
+                curves_pen.append((0,0,255))
+                curves_legends.append('w dot z')
         elif self.stroke_trace_view:
             curves.append([frame_trace,self.Euler_angles[self.mov_nr][self.seq_nr][self.comp_ind][1,:]*(180.0/np.pi)])
             curves_pen.append((255,0,0))

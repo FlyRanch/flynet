@@ -1705,13 +1705,13 @@ class Model():
         #self.opt.set_PSO_param(0.3,0.3,0.3,0.15,37,self.N_particles,self.N_iter)
         self.opt.set_PSO_param(0.5,0.3,0.3,0.15,37,self.N_particles,self.N_iter)
         model_file = 'model_parameters.json'
-        self.opt.load_model_json(self.mdl_dir,model_file)
+        self.opt.load_model_json(str(self.mdl_dir),model_file)
         wndw_size = np.asarray(self.window_size,dtype=np.float64)
         self.opt.set_calibration(self.c_type,self.c_params,wndw_size,self.N_cam)
         scale_array = np.asarray(self.scale)
         self.opt.set_scale(scale_array,5)
         self.opt.set_batch_size(batch_size_in)
-        self.opt.setup_threads(self.mdl_dir)
+        self.opt.setup_threads(str(self.mdl_dir))
 
     def pso_fit(self):
         scale_array = np.asarray(self.scale)
@@ -1878,7 +1878,9 @@ class Model():
                     N_f = len(self.seq_keys_list[i][j])
                     self.seq_keys_list[i][j].sort()
                     batch_nr = 0
-                    for k in range(N_f):
+                    # WBD DEBUG
+                    for k in range(1000):
+                    #for k in range(N_f):
                         # Check if center frame:
                         if k%self.batch_size==0:
                             f_start = self.seq_keys_list[i][j][k]
@@ -1893,7 +1895,7 @@ class Model():
                                 print('Analyzing batch: '+str(batch_nr)+', mov: '+str(i+1)+', seq: '+str(j+1)+', frame start: '+str(f_start)+', frame end: '+str(f_end))
                                 self.pso_fit_batch(img_batch,com_batch,body_mask_btch,wing_mask_btch,i,j,f_start,f_end,batch_nr)
                             progress_percentage = ((f_cntr*1.0)/(N_frames_total*1.0-1.0))*100.0
-                            self.progress_bar.setValue(progress_percentage)
+                            self.progress_bar.setValue(int(progress_percentage))
             # ae addition
             self.progress_bar.setValue(100)
             self.load_tracked_btn.setEnabled(True)

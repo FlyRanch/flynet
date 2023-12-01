@@ -31,6 +31,7 @@ from .PostProcessing import PostProcessing
 from .session_select import Ui_Session_Dialog
 from .fly_net_ui import Ui_MainWindow
 from .drosophila import model as drosophila 
+from . import FlyNet
 
 class CheckableDirModel(QtWidgets.QDirModel):
     def __init__(self, parent=None):
@@ -121,27 +122,36 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
     def load_data_gui(self):
 
         #self.base_dir = '/home/flynet/Documents/Flyami_movies'
-        self.home_dir = pathlib.Path().home()
-        self.base_dir = self.home_dir / 'flynet/movies'
-        self.select_session_window = SelectFolderWindow(str(self.base_dir))
-        self.select_session_window.setWindowTitle("Select session folder")
         #calib_fldr = '/home/flynet/Documents/FlyNet4/data'
         #self.select_calib_window = SelectFolderWindow(calib_fldr)
-        self.calib_dir = self.home_dir / 'flynet/calibrations'
+        #self.mdl_dir = '/home/flynet/Documents/FlyNet4/models'
+        #self.network_dir = '/home/flynet/Documents/FlyNet4/networks'
+
+        self.home_dir = pathlib.Path().home()
+        self.flynet_dir  = self.home_dir   / 'flynet'
+        self.movies_dir  = self.flynet_dir / 'movies'
+        self.save_dir    = self.flynet_dir / 'save'
+        self.calib_dir   = self.flynet_dir / 'calibrations'
+        self.network_dir = self.flynet_dir / 'network'
+        self.weights_dir = self.flynet_dir / 'weights' 
+        self.mdl_dir     = self.flynet_dir / 'models'
+
+        self.select_session_window = SelectFolderWindow(str(self.movies_dir))
+        self.select_session_window.setWindowTitle("Select session folder")
+
         self.select_calib_window = SelectFolderWindow(str(self.calib_dir))
         self.select_calib_window.setWindowTitle("Select calibration file")
-        self.select_movie_window = SelectFolderWindow(str(self.base_dir))
+
+        self.select_movie_window = SelectFolderWindow(str(self.movies_dir))
         self.select_movie_window.setWindowTitle("Select movie folder")
-        self.select_save_window = SelectFolderWindow(str(self.base_dir))
+
+        self.select_save_window = SelectFolderWindow(str(self.save_dir))
         self.select_save_window.setWindowTitle("Select save folder")
 
-        #self.mdl_dir = '/home/flynet/Documents/FlyNet4/models'
-        self.mdl_dir = self.home_dir / 'flynet/models'
         self.select_model_window = SelectFolderWindow(str(self.mdl_dir))
         self.select_model_window.setWindowTitle("Select model folder")
-        #self.network_dir = '/home/flynet/Documents/FlyNet4/networks'
-        self.network_dir = self.home_dir / 'flynet/networks'
-        self.weights_folder = self.network_dir
+
+        #self.trig_modes = ['...','start','center','end']
         self.trig_modes = ['...','start','center','end']
         self.network_options = ['...','FlyNet']
 
@@ -179,7 +189,7 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
         self.select_save_fldr_btn.clicked.connect(self.select_save_fldr_callback)
         self.img_viewer_1.set_ses_calc_progress(self.crop_seq_calc_progress)
 
-        self.load_model_callback(select_window=False)
+
 
     def select_session_callback(self):
         self.select_session_window.exec_()
@@ -558,8 +568,10 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
         print(self.c_params)
 
     def load_flight_seqs(self):
+        print('load_flight_seqs')
         self.img_viewer_1.load_flight_seqs()
         self.tracking_gui()
+        self.load_model_callback(select_window=False)
 
     def tracking_gui(self):
         self.tabWidget.setTabEnabled(1,True)
@@ -664,9 +676,7 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
         self.img_viewer_2.set_model(self.mdl)
         self.mdl.set_seq_list(self.img_viewer_2.seq_keys)
         # Set network combo:
-        self.weights_folder = self.network_dir
-        self.weights_folder = self.network_dir
-        self.select_weights_window = SelectFolderWindow(self.weights_folder)
+        self.select_weights_window = SelectFolderWindow(str(self.weights_dir))
         self.select_weights_window.setWindowTitle("Select network weights file")
         for net_option in self.network_options:
             self.network_combo.addItem(net_option)
@@ -685,27 +695,24 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
         self.network_index = 0
         if net_ind == 1:
             print('selected FlyNet')
-            os.chdir(self.network_dir+'/FlyNet')
-            sys.path.append(os.getcwd())
-            from FlyNet import Network
-            self.net = Network()
+            self.net = FlyNet.Network()
             self.network_index = 1
-        elif net_ind == 2:
-            print('selected FlyNet2')
-            os.chdir(self.network_dir+'/FlyNet2')
-            sys.path.append(os.getcwd())
-            from FlyNet2 import Network
-            self.net = Network()
-            self.network_index = 2
-        elif net_ind==3:
-            print('selected FlyNet3')
-            os.chdir(self.network_dir+'/FlyNet3')
-            sys.path.append(os.getcwd())
-            from FlyNet3 import Network
-            self.net = Network()
-            self.network_index = 3
-        else:
-            print('no network selected')
+        #elif net_ind == 2:
+        #    print('selected FlyNet2')
+        #    os.chdir(self.network_dir+'/FlyNet2')
+        #    sys.path.append(os.getcwd())
+        #    from FlyNet2 import Network
+        #    self.net = Network()
+        #    self.network_index = 2
+        #elif net_ind==3:
+        #    print('selected FlyNet3')
+        #    os.chdir(self.network_dir+'/FlyNet3')
+        #    sys.path.append(os.getcwd())
+        #    from FlyNet3 import Network
+        #    self.net = Network()
+        #    self.network_index = 3
+        #else:
+        #    print('no network selected')
 
     def load_weights_callback(self):
         self.select_weights_window.exec_()
