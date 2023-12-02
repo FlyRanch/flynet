@@ -128,10 +128,10 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
         #self.network_dir = '/home/flynet/Documents/FlyNet4/networks'
 
         self.home_dir = pathlib.Path().home()
-        self.flynet_dir  = self.home_dir   / 'flynet'
+        self.flynet_dir  = self.home_dir   / 'flynet_data'
         self.movies_dir  = self.flynet_dir / 'movies'
         self.save_dir    = self.flynet_dir / 'save'
-        self.calib_dir   = self.flynet_dir / 'calibrations'
+        self.calib_dir   = self.flynet_dir / 'camera' 
         self.network_dir = self.flynet_dir / 'network'
         self.weights_dir = self.flynet_dir / 'weights' 
         self.mdl_dir     = self.flynet_dir / 'models'
@@ -188,7 +188,6 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
         self.set_trigger_mode_box(self.trigger_mode_combo)
         self.select_save_fldr_btn.clicked.connect(self.select_save_fldr_callback)
         self.img_viewer_1.set_ses_calc_progress(self.crop_seq_calc_progress)
-
 
 
     def select_session_callback(self):
@@ -571,7 +570,13 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
         print('load_flight_seqs')
         self.img_viewer_1.load_flight_seqs()
         self.tracking_gui()
+
+        # Automatically load drospohila model and FlyNet network
         self.load_model_callback(select_window=False)
+        self.select_network(1)
+        self.network_combo.setCurrentIndex(1)
+        self.network_combo.setEnabled(False)
+
 
     def tracking_gui(self):
         self.tabWidget.setTabEnabled(1,True)
@@ -616,6 +621,7 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
         self.movie_spin_2.valueChanged.connect(self.img_viewer_2.set_movie_nr)
         # Select model button
         self.select_mdl_btn.clicked.connect(self.load_model_callback)
+        self.select_mdl_btn.setEnabled(False)
         # Batch size spin
         self.img_viewer_2.set_batch_size_spin(self.batch_size_spin)
         # Analysis progress
@@ -637,6 +643,7 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
             import model
             self.mdl = model.Model()
         else:
+            self.model_disp.setText('drosophila')
             self.mdl = drosophila.Model()
 
         #print('window size')
@@ -697,6 +704,8 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
             print('selected FlyNet')
             self.net = FlyNet.Network()
             self.network_index = 1
+        # Disabled to only use FlyNet network packaged with software
+        # ----------------------------------------------------------
         #elif net_ind == 2:
         #    print('selected FlyNet2')
         #    os.chdir(self.network_dir+'/FlyNet2')
@@ -713,6 +722,7 @@ class FlyNetViewer(QtWidgets.QMainWindow, Ui_MainWindow, QObject):
         #    self.network_index = 3
         #else:
         #    print('no network selected')
+        # ---------------------------------------------------------
 
     def load_weights_callback(self):
         self.select_weights_window.exec_()

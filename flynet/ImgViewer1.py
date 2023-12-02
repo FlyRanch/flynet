@@ -782,8 +782,8 @@ class ImgViewer1(pg.GraphicsLayoutWidget):
 
     def set_manual_mode_toggle(self,toggle_in):
         self.manual_toggle = toggle_in
-        self.manual_toggle.setChecked(False)
-        self.manual_mode = False
+        self.manual_toggle.setChecked(True)
+        self.manual_mode = True
         self.manual_toggle.toggled.connect(self.manual_mode_toggled)
 
     def manual_mode_toggled(self):
@@ -793,9 +793,13 @@ class ImgViewer1(pg.GraphicsLayoutWidget):
 
     def set_automatic_mode_toggle(self,toggle_in):
         self.automatic_toggle = toggle_in
-        self.automatic_toggle.setChecked(True)
-        self.automatic_mode = True
+        self.automatic_toggle.setChecked(False)
+        self.automatic_mode = False
         self.automatic_toggle.toggled.connect(self.automatic_mode_toggled)
+        # Automatic mode is currently not working ... disabled
+        # ----------------------------------------------------
+        self.automatic_toggle.setEnabled(False)
+        # ----------------------------------------------------
 
     def automatic_mode_toggled(self):
         if self.automatic_toggle.isChecked() == True:

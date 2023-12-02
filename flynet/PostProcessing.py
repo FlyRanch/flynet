@@ -78,6 +78,7 @@ class PostProcessing():
         #self.EKF_filter = Kalman_lib.Kalman()
         self.EKF_filter = flynet_kalman.Kalman()
 
+
     def set_seq_file(self,seq_file_in,seq_name_in):
         self.seq_name = seq_name_in
         self.seq_file = seq_file_in    

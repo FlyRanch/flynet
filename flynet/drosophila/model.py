@@ -1879,7 +1879,9 @@ class Model():
                     self.seq_keys_list[i][j].sort()
                     batch_nr = 0
                     # WBD DEBUG
+                    # -------------------------------
                     for k in range(1000):
+                    # -------------------------------
                     #for k in range(N_f):
                         # Check if center frame:
                         if k%self.batch_size==0:
