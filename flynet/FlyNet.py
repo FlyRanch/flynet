@@ -408,7 +408,7 @@ class Network():
         self.weights_loc = weights_loc_in
         self.weights_file = weights_file_in
 
-    def set_learning_rate(self,learning_rate, decay, decay_steps=10000):
+    def set_learning_rate(self, learning_rate, decay, decay_steps=10000):
         self.learning_rate = learning_rate
         self.decay = decay
         self.decay_steps = decay_steps
@@ -473,11 +473,11 @@ class Network():
             loss = tf.where(dist1<dist2, dist1, dist2)
             return tf.reduce_mean(loss)
 
-        lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-            initial_learning_rate=self.learning_rate, 
-            decay_steps=self.decay_steps,
-            decay_rate=self.decay,
-            )
+        #lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+        #    initial_learning_rate=self.learning_rate, 
+        #    decay_steps=self.decay_steps,
+        #    decay_rate=self.decay,
+        #    )
         
         self.fly_net.compile(loss={'q_h': 'mse',
             't_h': 'mse',
@@ -491,8 +491,8 @@ class Network():
             'q_R': 'mse',
             't_R': 'mse',
             'x_R': 'mse'}, 
-            optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule))
-            #optimizer=tf.keras.optimizers.Adam(lr=self.learning_rate, decay=self.decay))
+            #optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule))
+            optimizer=tf.keras.optimizers.Adam(learning_rate=self.learning_rate, weight_decay=self.decay))
         self.fly_net.summary()
         try:
             os.chdir(self.weights_loc)
@@ -720,12 +720,14 @@ class Network():
         dt_string = date_now.strftime("%d_%m_%Y_%H_%M_%S")
         weights_file_out = 'weights_' + dt_string + '.h5'
         print('weigth file out: ' + weights_file_out)
-        history = self.fly_net.fit_generator(generator=self.train_generator,
-            steps_per_epoch = N_train,
-            epochs = self.N_epochs,
-            validation_data = self.valid_generator,
-            validation_steps = N_valid,
-            verbose = 1)
+        history = self.fly_net.fit_generator( 
+                generator = self.train_generator,
+                steps_per_epoch = N_train,
+                epochs = self.N_epochs,
+                validation_data = self.valid_generator,
+                validation_steps = N_valid,
+                verbose = 1
+                )
         # Plot results:
         fig, axs = plt.subplots(6,1,sharex=True)
         t_epoch = np.arange(1,self.N_epochs+1)
@@ -899,124 +901,135 @@ class Network():
 
 # -------------------------------------------------------------------------------------------------------------------
 
-if __name__ == '__main__':
-    net = Network()
-    weights_folder = '/home/flythreads/Documents/FlyNet4/networks/FlyNet/weights'
-    #weights_file = 'weights_26_04_2021_20_48_12.h5'
-    #weights_file = 'weights_15_04_2021_10_28_25.h5'
-    #weights_file = 'weights_05_04_2021_20_37_49.h5'
-    #weights_file = 'weights_01_03_2022_11_39_07.h5'
-    weights_file = 'weights_23_03_2022_22_43_35.h5'
-    net.set_weights_file(weights_folder,weights_file)
-    net.set_learning_rate(1.0e-4,1.0e-6)
-    #net.set_learning_rate(1.0e-4,1.0e-6)
-
-    # create dataset based on tracked data:
-    #results_folder = '/media/flythreads/FlyamiDataB/opto_genetic_dataset/results'
-    #results_files  = ['seqs_Session_01_12_2020_10_22.h5py',
-    #    'seqs_Session_01_12_2020_11_25.h5py',
-    #    'seqs_Session_01_12_2020_12_34.h5py',
-    #    'seqs_Session_01_12_2020_13_00.h5py',
-    #    'seqs_Session_01_12_2020_14_24.h5py',
-    #    'seqs_Session_02_12_2020_13_59.h5py',
-    #    'seqs_Session_02_12_2020_15_59.h5py',
-    #    'seqs_Session_03_12_2020_12_52.h5py']
-
-    results_folder = '/media/flythreads/FlyamiDataB/flyami/results'
-    results_files = [
-        ['seqs_Session_04_01_2021_16_14.h5py', [1,2]],
-        ['seqs_Session_04_01_2021_16_30.h5py', [1,2,3,4,5,6,8]],
-        ['seqs_Session_08_02_2021_15_14.h5py', [1,2,3,4,5,6]],
-        ['seqs_Session_17_02_2021_13_18.h5py', [1,2,3,5,7,8]],
-        ['seqs_Session_02_03_2021_11_54.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_28_10_2020_13_18.h5py', [1,2,3]],
-        ['seqs_Session_06_11_2020_10_55.h5py', [1,2,3,4,5,6,8]],
-        ['seqs_Session_13_11_2020_11_31.h5py', [1,2,3]],
-        ['seqs_Session_17_11_2020_12_38.h5py', [1,2,3,4,5,6,7]],
-        ['seqs_Session_06_01_2021_14_02.h5py', [1,2,3,4,5,6,7]],
-        ['seqs_Session_10_02_2021_12_59.h5py', [1,2,3,4,5,6]],
-        ['seqs_Session_05_03_2021_14_32.h5py', [1]],
-        ['seqs_Session_31_03_2021_16_07.h5py', [1]],
-        ['seqs_Session_02_11_2020_11_15.h5py', [3,4,5,6,7]],
-        ['seqs_Session_08_12_2020_14_40.h5py', [1]],
-        ['seqs_Session_05_01_2021_15_21.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_19_02_2021_13_00.h5py', [1,2,3,4,5,6,7]],
-        ['seqs_Session_02_03_2021_12_50.h5py', [1,2,3]],
-        ['seqs_Session_04_03_2021_11_17.h5py', [1,2,3,4,6,7]],
-        ['seqs_Session_04_03_2021_15_06.h5py', [2,5,7,8]],
-        ['seqs_Session_28_10_2020_11_58.h5py', [1,3,4,5,6,7,8]],
-        ['seqs_Session_06_11_2020_11_36.h5py', [1,2,3]],
-        ['seqs_Session_05_01_2021_14_55.h5py', [1]],
-        ['seqs_Session_04_02_2021_12_44.h5py', [2]],
-        ['seqs_Session_08_02_2021_14_31.h5py', [1,2,3,4,5,6,7]],
-        ['seqs_Session_27_02_2021_13_19.h5py', [1,2,4,6]],
-        ['seqs_Session_01_03_2021_14_58.h5py', [1,2,4]],
-        ['seqs_Session_03_03_2021_14_57.h5py', [1,2,4,6,7,8]],
-        ['seqs_Session_11_03_2021_10_51.h5py', [1,2,3]],
-        ['seqs_Session_08_12_2020_15_30.h5py', [1,2,3,4]],
-        ['seqs_Session_17_02_2021_14_16.h5py', [1,3,4,5,6,7,8]],
-        ['seqs_Session_22_02_2021_12_45.h5py', [1,2,4,5]],
-        ['seqs_Session_27_02_2021_14_57.h5py', [1,2,3]],
-        ['seqs_Session_27_02_2021_15_12.h5py', [1]],
-        ['seqs_Session_22_03_2021_11_19.h5py', [1]],
-        ['seqs_Session_24_03_2021_13_39.h5py', [1,2]],
-        ['seqs_Session_13_11_2020_10_23.h5py', [2,3,4,5,7]],
-        ['seqs_Session_17_11_2020_14_34.h5py', [1,3]],
-        ['seqs_Session_17_02_2021_12_27.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_01_03_2021_11_14.h5py', [1,2,3,5]],
-        ['seqs_Session_08_11_2020_11_56.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_17_11_2020_13_51.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_04_01_2021_14_42.h5py', [1,2,3,4,5,6,7]],
-        ['seqs_Session_06_01_2021_15_32.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_07_01_2021_14_17.h5py', [1,2,3,4,5,6,7]],
-        ['seqs_Session_04_02_2021_13_51.h5py', [1,2]],
-        ['seqs_Session_19_02_2021_15_47.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_22_02_2021_11_36.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_25_02_2021_13_35.h5py', [1,2,3]],
-        ['seqs_Session_25_02_2021_14_05.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_25_02_2021_14_05.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_28_10_2020_14_05.h5py', [1,2,3]],
-        ['seqs_Session_08_11_2020_12_24.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_15_01_2021_15_35.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_18_02_2021_14_16.h5py', [1,2,3,4]],
-        ['seqs_Session_04_03_2021_12_45.h5py', [1,2,3,4,5]],
-        ['seqs_Session_23_03_2021_13_19.h5py', [1,2,3]],
-        ['seqs_Session_04_11_2020_13_43.h5py', [1,2,3,4,6,8]],
-        ['seqs_Session_05_01_2021_13_40.h5py', [8]],
-        ['seqs_Session_15_01_2021_16_34.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_10_02_2021_12_08.h5py', [1,3,4,5,6,7,8]],
-        ['seqs_Session_01_03_2021_11_42.h5py', [1,2,3,4,5]],
-        ['seqs_Session_03_03_2021_15_32.h5py', [1,2]],
-        ['seqs_Session_13_03_2021_13_53.h5py', [1,2,3,4,5]],
-        ['seqs_Session_08_11_2020_11_24.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_04_01_2021_15_30.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_05_01_2021_14_17.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_07_01_2021_15_55.h5py', [1]],
-        ['seqs_Session_08_02_2021_15_51.h5py', [1,2,3,4,5]],
-        ['seqs_Session_01_03_2021_14_26.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_05_03_2021_11_35.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_06_11_2020_12_16.h5py', [1,2,3,4,5,6,7,8]],
-        ['seqs_Session_04_02_2021_11_58.h5py', [4,5]],
-        ['seqs_Session_22_02_2021_15_57.h5py', [1,2,3,4,5,6,8]],
-        ['seqs_Session_05_03_2021_10_53.h5py', [1,2,3,4,5,6,7,8]]
-    ]
-
-
-    man_file_loc = '/home/flythreads/Documents/FlyNet4/networks/labels'
-
-    #net.train_on_tracked_data(results_folder,results_files,man_file_loc,10)
-
-    
-    man_file_train = 'tracked_labels.h5'
-    man_file_valid = 'tracked_labels_valid.h5'
-    #man_file_train = 'labels.h5'
-    #man_file_valid = 'valid_labels.h5'
-    #man_file_train = 'labels.h5'
-    #man_file_valid = 'tracked_labels_valid.h5'
-    net.set_annotated_data(man_file_loc,man_file_train,man_file_valid)
-    net.set_batch_size(500)
-    net.load_network()
-    net.set_N_epochs(50)
-    net.train_network()
-    
-    plt.show()
+#if __name__ == '__main__':
+#    net = Network()
+#    weights_folder = '/home/flythreads/Documents/FlyNet4/networks/FlyNet/weights'
+#    #weights_file = 'weights_26_04_2021_20_48_12.h5'
+#    #weights_file = 'weights_15_04_2021_10_28_25.h5'
+#    #weights_file = 'weights_05_04_2021_20_37_49.h5'
+#    #weights_file = 'weights_01_03_2022_11_39_07.h5'
+#    weights_file = 'weights_23_03_2022_22_43_35.h5'
+#    net.set_weights_file(weights_folder,weights_file)
+#    net.set_learning_rate(1.0e-4,1.0e-6)
+#    #net.set_learning_rate(1.0e-4,1.0e-6)
+#
+#    # create dataset based on tracked data:
+#    #results_folder = '/media/flythreads/FlyamiDataB/opto_genetic_dataset/results'
+#    #results_files  = ['seqs_Session_01_12_2020_10_22.h5py',
+#    #    'seqs_Session_01_12_2020_11_25.h5py',
+#    #    'seqs_Session_01_12_2020_12_34.h5py',
+#    #    'seqs_Session_01_12_2020_13_00.h5py',
+#    #    'seqs_Session_01_12_2020_14_24.h5py',
+#    #    'seqs_Session_02_12_2020_13_59.h5py',
+#    #    'seqs_Session_02_12_2020_15_59.h5py',
+#    #    'seqs_Session_03_12_2020_12_52.h5py']
+#
+#    results_folder = '/media/flythreads/FlyamiDataB/flyami/results'
+#    results_files = [
+#        ['seqs_Session_04_01_2021_16_14.h5py', [1,2]],
+#        ['seqs_Session_04_01_2021_16_30.h5py', [1,2,3,4,5,6,8]],
+#        ['seqs_Session_08_02_2021_15_14.h5py', [1,2,3,4,5,6]],
+#        ['seqs_Session_17_02_2021_13_18.h5py', [1,2,3,5,7,8]],
+#        ['seqs_Session_02_03_2021_11_54.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_28_10_2020_13_18.h5py', [1,2,3]],
+#        ['seqs_Session_06_11_2020_10_55.h5py', [1,2,3,4,5,6,8]],
+#        ['seqs_Session_13_11_2020_11_31.h5py', [1,2,3]],
+#        ['seqs_Session_17_11_2020_12_38.h5py', [1,2,3,4,5,6,7]],
+#        ['seqs_Session_06_01_2021_14_02.h5py', [1,2,3,4,5,6,7]],
+#        ['seqs_Session_10_02_2021_12_59.h5py', [1,2,3,4,5,6]],
+#        ['seqs_Session_05_03_2021_14_32.h5py', [1]],
+#        ['seqs_Session_31_03_2021_16_07.h5py', [1]],
+#        ['seqs_Session_02_11_2020_11_15.h5py', [3,4,5,6,7]],
+#        ['seqs_Session_08_12_2020_14_40.h5py', [1]],
+#        ['seqs_Session_05_01_2021_15_21.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_19_02_2021_13_00.h5py', [1,2,3,4,5,6,7]],
+#        ['seqs_Session_02_03_2021_12_50.h5py', [1,2,3]],
+#        ['seqs_Session_04_03_2021_11_17.h5py', [1,2,3,4,6,7]],
+#        ['seqs_Session_04_03_2021_15_06.h5py', [2,5,7,8]],
+#        ['seqs_Session_28_10_2020_11_58.h5py', [1,3,4,5,6,7,8]],
+#        ['seqs_Session_06_11_2020_11_36.h5py', [1,2,3]],
+#        ['seqs_Session_05_01_2021_14_55.h5py', [1]],
+#        ['seqs_Session_04_02_2021_12_44.h5py', [2]],
+#        ['seqs_Session_08_02_2021_14_31.h5py', [1,2,3,4,5,6,7]],
+#        ['seqs_Session_27_02_2021_13_19.h5py', [1,2,4,6]],
+#        ['seqs_Session_01_03_2021_14_58.h5py', [1,2,4]],
+#        ['seqs_Session_03_03_2021_14_57.h5py', [1,2,4,6,7,8]],
+#        ['seqs_Session_11_03_2021_10_51.h5py', [1,2,3]],
+#        ['seqs_Session_08_12_2020_15_30.h5py', [1,2,3,4]],
+#        ['seqs_Session_17_02_2021_14_16.h5py', [1,3,4,5,6,7,8]],
+#        ['seqs_Session_22_02_2021_12_45.h5py', [1,2,4,5]],
+#        ['seqs_Session_27_02_2021_14_57.h5py', [1,2,3]],
+#        ['seqs_Session_27_02_2021_15_12.h5py', [1]],
+#        ['seqs_Session_22_03_2021_11_19.h5py', [1]],
+#        ['seqs_Session_24_03_2021_13_39.h5py', [1,2]],
+#        ['seqs_Session_13_11_2020_10_23.h5py', [2,3,4,5,7]],
+#        ['seqs_Session_17_11_2020_14_34.h5py', [1,3]],
+#        ['seqs_Session_17_02_2021_12_27.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_01_03_2021_11_14.h5py', [1,2,3,5]],
+#        ['seqs_Session_08_11_2020_11_56.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_17_11_2020_13_51.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_04_01_2021_14_42.h5py', [1,2,3,4,5,6,7]],
+#        ['seqs_Session_06_01_2021_15_32.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_07_01_2021_14_17.h5py', [1,2,3,4,5,6,7]],
+#        ['seqs_Session_04_02_2021_13_51.h5py', [1,2]],
+#        ['seqs_Session_19_02_2021_15_47.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_22_02_2021_11_36.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_25_02_2021_13_35.h5py', [1,2,3]],
+#        ['seqs_Session_25_02_2021_14_05.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_25_02_2021_14_05.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_28_10_2020_14_05.h5py', [1,2,3]],
+#        ['seqs_Session_08_11_2020_12_24.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_15_01_2021_15_35.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_18_02_2021_14_16.h5py', [1,2,3,4]],
+#        ['seqs_Session_04_03_2021_12_45.h5py', [1,2,3,4,5]],
+#        ['seqs_Session_23_03_2021_13_19.h5py', [1,2,3]],
+#        ['seqs_Session_04_11_2020_13_43.h5py', [1,2,3,4,6,8]],
+#        ['seqs_Session_05_01_2021_13_40.h5py', [8]],
+#        ['seqs_Session_15_01_2021_16_34.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_10_02_2021_12_08.h5py', [1,3,4,5,6,7,8]],
+#        ['seqs_Session_01_03_2021_11_42.h5py', [1,2,3,4,5]],
+#        ['seqs_Session_03_03_2021_15_32.h5py', [1,2]],
+#    man_file_train = 'tracked_labels.h5'
+#    man_file_valid = 'tracked_labels_valid.h5'
+#    #man_file_train = 'labels.h5'
+#    #man_file_valid = 'valid_labels.h5'
+#    #man_file_train = 'labels.h5'
+#    #man_file_valid = 'tracked_labels_valid.h5'
+#    net.set_annotated_data(man_file_loc,man_file_train,man_file_valid)
+#    net.set_batch_size(500)
+#    net.load_network()
+#    net.set_N_epochs(50)
+#    net.train_network()
+#    plt.show()
+#        ['seqs_Session_13_03_2021_13_53.h5py', [1,2,3,4,5]],
+#        ['seqs_Session_08_11_2020_11_24.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_04_01_2021_15_30.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_05_01_2021_14_17.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_07_01_2021_15_55.h5py', [1]],
+#        ['seqs_Session_08_02_2021_15_51.h5py', [1,2,3,4,5]],
+#        ['seqs_Session_01_03_2021_14_26.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_05_03_2021_11_35.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_06_11_2020_12_16.h5py', [1,2,3,4,5,6,7,8]],
+#        ['seqs_Session_04_02_2021_11_58.h5py', [4,5]],
+#        ['seqs_Session_22_02_2021_15_57.h5py', [1,2,3,4,5,6,8]],
+#        ['seqs_Session_05_03_2021_10_53.h5py', [1,2,3,4,5,6,7,8]]
+#    ]
+#
+#
+#    man_file_loc = '/home/flythreads/Documents/FlyNet4/networks/labels'
+#
+#    #net.train_on_tracked_data(results_folder,results_files,man_file_loc,10)
+#
+#    
+#    man_file_train = 'tracked_labels.h5'
+#    man_file_valid = 'tracked_labels_valid.h5'
+#    #man_file_train = 'labels.h5'
+#    #man_file_valid = 'valid_labels.h5'
+#    #man_file_train = 'labels.h5'
+#    #man_file_valid = 'tracked_labels_valid.h5'
+#    net.set_annotated_data(man_file_loc,man_file_train,man_file_valid)
+#    net.set_batch_size(500)
+#    net.load_network()
+#    net.set_N_epochs(50)
+#    net.train_network()
+#    plt.show()

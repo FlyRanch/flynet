@@ -11,21 +11,21 @@ license = {text="MIT"}
 requires-python = ">= 3.10,<3.13"
 
 dependencies = [
-    #"tensorflow ~= 2.12.0",
-    #"keras ~= 2.12.0",
-    #"numpy ~= 1.23",
-    #"scipy ~= 1.11",
-    #"matplotlib ~= 3.7.1",
-    #"vtk ~= 9.2.6",
-    #"opencv-python-headless ~= 4.8.1.78",
-    #"geomdl ~= 5.3.1",
-    #"h5py ~= 3.8.0",
-    #"PyQt5 ~= 5.15.10",
-    #"pyqtgraph ~= 0.13.3",
-    #"scikit-learn ~= 1.3.2",
-    #"pySciCam@git+https://github.com/willdickson/pySciCam",
-    #"flynet-kalman@git+https://github.com/FlyRanch/flynet-kalman",
-    #"flynet-optimizer@git+https://github.com/FlyRanch/flynet-optimizer",
+    "tensorflow ~= 2.12.0",
+    "keras ~= 2.12.0",
+    "numpy ~= 1.23",
+    "scipy ~= 1.11",
+    "matplotlib ~= 3.7.1",
+    "vtk ~= 9.2.6",
+    "opencv-python-headless ~= 4.8.1.78",
+    "geomdl ~= 5.3.1",
+    "h5py ~= 3.8.0",
+    "PyQt5 ~= 5.15.10",
+    "pyqtgraph ~= 0.13.3",
+    "scikit-learn ~= 1.3.2",
+    "pySciCam@git+https://github.com/willdickson/pySciCam",
+    "flynet-kalman@git+https://github.com/FlyRanch/flynet-kalman",
+    "flynet-optimizer@git+https://github.com/FlyRanch/flynet-optimizer",
 ]
 
 [project.scripts]
