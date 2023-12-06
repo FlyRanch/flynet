@@ -19,6 +19,7 @@ import copy
 import math
 import gzip
 import random
+import pathlib
 from datetime import datetime
 
 import tensorflow as tf
@@ -165,14 +166,12 @@ class data_generator2(Sequence):
         self.N_cam = 3
 
     def open_dataset(self):
-        os.chdir(self.file_loc)
-        self.label_file = h5py.File(self.file_name,'r')
+        file_path = pathlib.Path(self.file_loc) / self.file_name
+        self.label_file = h5py.File(str(file_path),'r')
         self.label_keys = list(self.label_file.keys())
         self.N_labels = int(len(self.label_keys))
-        #print(self.N_labels)
         self.indices = np.arange(0,self.N_labels)
         np.random.shuffle(self.indices)
-        #self.setup_scaler()
 
     def close_dataset(self):
         self.label_file.close()
@@ -191,7 +190,6 @@ class data_generator2(Sequence):
                 batch_list.append(ind)
             else:
                 batch_list.append(ind)
-        print(self.batch_indices)
         self.N_batches = len(self.batch_indices)
         if self.train_or_valid==0:
             self.N_train = self.N_batches
@@ -599,119 +597,20 @@ class Network():
         model = Model(inputs=input_mdl, outputs=output_list, name='FlyNet')
         return model
 
-    '''
-    def build_network(self):
-        input_mdl = Input(shape=self.input_shape)
-        branches_1 = []
-        noise_rate = 0.1
-        dropout_rate = 0.2
-
-        for n in range(self.N_cam):
-            branch_n = Lambda(lambda x: x[:,:,:,:,n])(input_mdl)
-            #branch_n = GaussianNoise(noise_rate)(branch_n)
-            branches_1.append(branch_n)
-        model_conc = Concatenate(axis=2)(branches_1)
-
-        # body branch:
-        body_conv = Conv2D(16,kernel_size=(3,3),strides=2,padding='same',activation='selu')(model_conc)
-        body_conv = BatchNormalization()(body_conv)
-        body_conv = MaxPooling2D(pool_size=(2,2),strides=2)(body_conv)
-        body_conv = Conv2D(32,kernel_size=(3,3),strides=2,padding='same',activation='selu')(body_conv)
-        body_conv = BatchNormalization()(body_conv)
-        body_conv = MaxPooling2D(pool_size=(2,2),strides=2)(body_conv)
-        body_conv = Conv2D(64,kernel_size=(3,3),strides=2,padding='same',activation='selu')(body_conv)
-        body_conv = BatchNormalization()(body_conv)
-        body_conv = Conv2D(128,kernel_size=(7,7),strides=(7,7),padding='same',activation='selu')(body_conv)
-        body_conv = BatchNormalization()(body_conv)
-        body_dense = Flatten()(body_conv)
-        body_dense = Dropout(dropout_rate)(body_dense)
-        body_dense = Dense(256,activation='relu')(body_dense)
-        body_dense = Dropout(dropout_rate)(body_dense)
-
-        # q_head
-        q_head = Dense(4,activation='linear',name='q_h')(body_dense)
-        # t_head
-        t_head = Dense(3,activation='linear',name='t_h')(body_dense)
-        # q_thorax
-        q_thorax = Dense(4,activation='linear',name='q_t')(body_dense)
-        # t_thorax
-        t_thorax = Dense(3,activation='linear',name='t_t')(body_dense)
-        # q_abdomen
-        q_abdomen = Dense(4,activation='linear',name='q_a')(body_dense)
-        # t abdomen
-        t_abdomen = Dense(3,activation='linear',name='t_a')(body_dense)
-
-        # wing L branch:
-        wing_L_conv = Conv2D(32,kernel_size=(3,3),strides=2,padding='same',activation='selu')(model_conc)
-        wing_L_conv = BatchNormalization()(wing_L_conv)
-        wing_L_conv = MaxPooling2D(pool_size=(2,2),strides=2)(wing_L_conv)
-        wing_L_conv = Conv2D(64,kernel_size=(3,3),strides=2,padding='same',activation='selu')(wing_L_conv)
-        wing_L_conv = BatchNormalization()(wing_L_conv)
-        wing_L_conv = MaxPooling2D(pool_size=(2,2),strides=2)(wing_L_conv)
-        wing_L_conv = Conv2D(256,kernel_size=(3,3),strides=2,padding='same',activation='selu')(wing_L_conv)
-        wing_L_conv = BatchNormalization()(wing_L_conv)
-        wing_L_conv = MaxPooling2D(pool_size=(2,2),strides=2)(wing_L_conv)
-        wing_L_conv = Conv2D(512,kernel_size=(3,3),strides=(3,2),padding='same',activation='selu')(wing_L_conv)
-        wing_L_conv = BatchNormalization()(wing_L_conv)
-        wing_L_dense = Flatten()(wing_L_conv)
-        wing_L_dense = Dropout(dropout_rate)(wing_L_dense)
-        wing_L_dense = Dense(1024,activation='selu')(wing_L_dense)
-        wing_L_dense = Dropout(dropout_rate)(wing_L_dense)
-
-        # q_L
-        q_L = Dense(4,activation='linear',name='q_L')(wing_L_dense)
-        # t_L
-        t_L = Dense(3,activation='linear',name='t_L')(wing_L_dense)
-        # x_L
-        x_L = Dense(1,activation='linear',name='x_L')(wing_L_dense)
-
-        # wing R branch:
-        wing_R_conv = Conv2D(32,kernel_size=(3,3),strides=2,padding='same',activation='selu')(model_conc)
-        wing_R_conv = BatchNormalization()(wing_R_conv)
-        wing_R_conv = MaxPooling2D(pool_size=(2,2),strides=2)(wing_R_conv)
-        wing_R_conv = Conv2D(64,kernel_size=(3,3),strides=2,padding='same',activation='selu')(wing_R_conv)
-        wing_R_conv = BatchNormalization()(wing_R_conv)
-        wing_R_conv = MaxPooling2D(pool_size=(2,2),strides=2)(wing_R_conv)
-        wing_R_conv = Conv2D(256,kernel_size=(3,3),strides=2,padding='same',activation='selu')(wing_R_conv)
-        wing_R_conv = BatchNormalization()(wing_R_conv)
-        wing_R_conv = MaxPooling2D(pool_size=(2,2),strides=2)(wing_R_conv)
-        wing_R_conv = Conv2D(512,kernel_size=(3,3),strides=(3,2),padding='same',activation='selu')(wing_R_conv)
-        wing_R_conv = BatchNormalization()(wing_R_conv)
-        wing_R_dense = Flatten()(wing_R_conv)
-        wing_R_dense = Dropout(dropout_rate)(wing_R_dense)
-        wing_R_dense = Dense(1024,activation='selu')(wing_R_dense)
-        wing_R_dense = Dropout(dropout_rate)(wing_R_dense)
-
-        # q_R
-        q_R = Dense(4,activation='linear',name='q_R')(wing_R_dense)
-        # t_R
-        t_R = Dense(3,activation='linear',name='t_R')(wing_R_dense)
-        # x_R
-        x_R = Dense(1,activation='linear',name='x_R')(wing_R_dense)
-        
-        output_list = [q_head,t_head,q_thorax,t_thorax,q_abdomen,t_abdomen,q_L,t_L,x_L,q_R,t_R,x_R]
-        model = Model(inputs=input_mdl, outputs=output_list, name='FlyNet')
-        return model
-    '''
 
     def train_network(self):
-        #self.train_generator = data_generator(self.art_file_loc,self.art_file_name,0.1,0)
-        #self.valid_generator = data_generator(self.art_file_loc,self.art_file_name,0.1,1)
         self.train_generator = data_generator2(self.man_file_loc,self.man_file_train,0.0,0)
         self.valid_generator = data_generator2(self.man_file_loc,self.man_file_valid,1.0,1)
         self.train_generator.open_dataset()
         self.valid_generator.open_dataset()
         self.train_generator.set_batch_size(self.batch_size)
         self.valid_generator.set_batch_size(self.batch_size)
-        #self.scaler = self.train_generator.return_scaler()
-        #self.valid_generator.set_scaler(self.scaler)
-        #self.train_generator.set_calib_param(self.c2w_matrices,self.w2c_matrices,self.ds)
-        #self.valid_generator.set_calib_param(self.c2w_matrices,self.w2c_matrices,self.ds)
-        # Get batch size and N_train and N_valid:
         N_train = self.train_generator.return_N_train()
-        print(N_train)
         N_valid = self.valid_generator.return_N_valid()
-        print(N_valid)
+
+        print(f'N_train: {N_train}')
+        print(f'N_valid: {N_valid}')
+
         # Load / build network
         self.load_network()
 
@@ -728,6 +627,12 @@ class Network():
                 validation_steps = N_valid,
                 verbose = 1
                 )
+
+        print(f'type(history) = {type(history)}')
+        print(f'type(history.history) = {type(history.history)}')
+        print(f'type(history.history["loss"]) = {type(history.history["loss"])}')
+        print(history.history.keys())
+
         # Plot results:
         fig, axs = plt.subplots(6,1,sharex=True)
         t_epoch = np.arange(1,self.N_epochs+1)
@@ -762,6 +667,7 @@ class Network():
         print('saved: ' + str(weights_file_out))
         self.train_generator.close_dataset()
         self.valid_generator.close_dataset()
+        return history.history
 
     def train_network_annotated(self):
         self.train_generator = data_generator(self.man_file_loc,self.man_file_name,0.1,0)
