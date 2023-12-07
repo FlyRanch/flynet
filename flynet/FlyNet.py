@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import numpy as np
 import sys
+import pickle
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QTableWidget,QTableWidgetItem,QVBoxLayout
@@ -465,11 +466,11 @@ class Network():
         #    'x_R': 'LogCosh'}, 
         #    optimizer=tf.keras.optimizers.Adam(lr=self.learning_rate, decay=self.decay))
 
-        def quaternion_loss(self,y_true, y_pred):
-            dist1 = tf.reduce_mean(tf.abs(y_true-y_pred), axis=-1)
-            dist2 = tf.reduce_mean(tf.abs(y_true+y_pred), axis=-1)
-            loss = tf.where(dist1<dist2, dist1, dist2)
-            return tf.reduce_mean(loss)
+        #def quaternion_loss(self,y_true, y_pred):
+        #    dist1 = tf.reduce_mean(tf.abs(y_true-y_pred), axis=-1)
+        #    dist2 = tf.reduce_mean(tf.abs(y_true+y_pred), axis=-1)
+        #    loss = tf.where(dist1<dist2, dist1, dist2)
+        #    return tf.reduce_mean(loss)
 
         #lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
         #    initial_learning_rate=self.learning_rate, 
@@ -616,9 +617,6 @@ class Network():
 
         # Create new weights file:
         date_now = datetime.now()
-        dt_string = date_now.strftime("%d_%m_%Y_%H_%M_%S")
-        weights_file_out = 'weights_' + dt_string + '.h5'
-        print('weigth file out: ' + weights_file_out)
         history = self.fly_net.fit_generator( 
                 generator = self.train_generator,
                 steps_per_epoch = N_train,
@@ -632,6 +630,20 @@ class Network():
         print(f'type(history.history) = {type(history.history)}')
         print(f'type(history.history["loss"]) = {type(history.history["loss"])}')
         print(history.history.keys())
+
+        # Save weights file
+        dt_string = date_now.strftime("%d_%m_%Y_%H_%M_%S")
+        weights_file_out = f'weights_{dt_string}.h5'
+        self.fly_net.save_weights(weights_file_out)
+        print(f'saved: {weights_file_out}')
+        self.train_generator.close_dataset()
+        self.valid_generator.close_dataset()
+
+        # Save history file
+        history_file_out = f'history_{dt_string}.pkl'
+        with open(history_file_out, 'wb') as f:
+            pickle.dump(histroy.history, f)
+        print(f'saved: {history_file_out}')
 
         # Plot results:
         fig, axs = plt.subplots(6,1,sharex=True)
@@ -662,12 +674,8 @@ class Network():
         axs[5].plot(t_epoch,np.log10(history.history['val_q_R_loss']),color='m')
         axs[5].plot(t_epoch,np.log10(history.history['val_t_R_loss']),color='c')
         axs[5].plot(t_epoch,np.log10(history.history['val_x_R_loss']),color='y')
-        self.fly_net.save_weights(weights_file_out)
-        self.fly_net.save_weights(weights_file_out)
-        print('saved: ' + str(weights_file_out))
-        self.train_generator.close_dataset()
-        self.valid_generator.close_dataset()
-        return history.history
+        plt.show()
+    
 
     def train_network_annotated(self):
         self.train_generator = data_generator(self.man_file_loc,self.man_file_name,0.1,0)
