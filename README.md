@@ -37,8 +37,9 @@ The installation typically takes around 15-20min.
 A set of example data for running the flynet GUI application are provided on
 CaltechData (TODO add location).   
 
-* Download the flynet.zip file from CaltechDATA, unzip the archive and place
-  the resulting flynet_data directory in the user's home directory. 
+* Download the flynet.zip file from CaltechDATA
+  [here](https://data.caltech.edu/records/aypcy-ck464), unzip the archive and
+  place the resulting flynet_data directory in the user's home directory. 
 
 * To start the flynet application run 'flynet-app' on the command line. 
 
@@ -49,8 +50,9 @@ network is trained is provided in the 'examples' subdirectory.  A set of
 example data for running the flynet GUI application are provided on CaltechData
 (TODO add location).   
 
-* Download the flynet.zip file from CaltechDATA, unzip the archive and place
-  the resulting flynet_data directory in the user's home directory. 
+* Download the flynet.zip file from CaltechDATA
+  [here](https://data.caltech.edu/records/aypcy-ck464) , unzip the archive and
+  place the resulting flynet_data directory in the user's home directory. 
 
 * Run the train_fly.py script from within the 'examples' subdirectory.
 
